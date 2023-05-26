@@ -25,10 +25,12 @@ class BeerRepositoryTest {
         println(objectMapper.writeValueAsString(getTestBeer()))
     }
 
-    private fun getTestBeer() = Beer(
-        beerName = "Space Dust",
-        beerStyle = "IPA",
-        price = BigDecimal.TEN,
-        upc = "123213",
-    )
+    companion object {
+        fun getTestBeer() = Beer(
+            beerName = "Space Dust",
+            beerStyle = "IPA",
+            price = BigDecimal.TEN,
+            upc = "123213",
+        )
+    }
 }
