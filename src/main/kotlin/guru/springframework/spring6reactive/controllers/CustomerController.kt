@@ -12,34 +12,34 @@ import reactor.core.publisher.Mono
 @RestController
 @Suppress("unused")
 class CustomerController(private val customerService: CustomerService) {
-    @GetMapping(customerPath)
+    @GetMapping(CUSTOMER_PATH)
     fun listCustomers(): Flux<CustomerDTO> {
         return customerService.listCustomers()
     }
 
-    @GetMapping(customerPathId)
+    @GetMapping(CUSTOMER_PATH_ID)
     fun getCustomerById(@PathVariable("customerId") customerId: Int): Mono<CustomerDTO> {
         return customerService.getCustomerById(customerId)
     }
 
-    @PostMapping(customerPath)
+    @PostMapping(CUSTOMER_PATH)
     fun createNewCustomer(@RequestBody @Validated customerDTO: CustomerDTO): Mono<ResponseEntity<Unit>> {
         return customerService.saveNewCustomer(customerDTO).map { savedDto ->
             ResponseEntity.created(
-                UriComponentsBuilder.fromHttpUrl("http://localhost:8080/$customerPath/${savedDto.id}").build().toUri()
+                UriComponentsBuilder.fromHttpUrl("http://localhost:8080/$CUSTOMER_PATH/${savedDto.id}").build().toUri()
             ).build()
         }
     }
 
-    @PutMapping(customerPathId)
+    @PutMapping(CUSTOMER_PATH_ID)
     fun updateExistingCustomer(
         @PathVariable("customerId") customerId: Int,
         @RequestBody @Validated customerDTO: CustomerDTO
     ): Mono<ResponseEntity<Unit>> {
-        return customerService.updateCustomer(customerId, customerDTO).map { ResponseEntity.ok().build() }
+        return customerService.updateCustomer(customerId, customerDTO).map { ResponseEntity.noContent().build() }
     }
 
-    @PatchMapping(customerPathId)
+    @PatchMapping(CUSTOMER_PATH_ID)
     fun updateExistingCustomerPatchById(
         @PathVariable("customerId") customerId: Int,
         @RequestBody @Validated customerDTO: CustomerDTO
@@ -47,13 +47,13 @@ class CustomerController(private val customerService: CustomerService) {
         return customerService.patchCustomer(customerId, customerDTO).map { ResponseEntity.ok().build() }
     }
 
-    @DeleteMapping(customerPathId)
+    @DeleteMapping(CUSTOMER_PATH_ID)
     fun deleteCustomer(@PathVariable("customerId") customerId: Int): Mono<ResponseEntity<Unit>> {
-        return customerService.deleteCustomerById(customerId).map { ResponseEntity.noContent().build() }
+        return customerService.deleteCustomerById(customerId).thenReturn(ResponseEntity.noContent().build())
     }
 
     companion object {
-        const val customerPath = "/api/v2/customer"
-        const val customerPathId = "$customerPath/{customerId}"
+        const val CUSTOMER_PATH = "/api/v2/customer"
+        const val CUSTOMER_PATH_ID = "$CUSTOMER_PATH/{customerId}"
     }
 }

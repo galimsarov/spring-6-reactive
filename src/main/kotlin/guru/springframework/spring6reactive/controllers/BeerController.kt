@@ -36,7 +36,7 @@ class BeerController(private val beerService: BeerService) {
         @PathVariable("beerId") beerId: Int,
         @RequestBody @Validated beerDTO: BeerDTO
     ): Mono<ResponseEntity<Unit>> {
-        return beerService.updateBeer(beerId, beerDTO).map { ResponseEntity.ok().build() }
+        return beerService.updateBeer(beerId, beerDTO).map { ResponseEntity.noContent().build() }
     }
 
     @PatchMapping(BEER_PATH_ID)
@@ -49,7 +49,7 @@ class BeerController(private val beerService: BeerService) {
 
     @DeleteMapping(BEER_PATH_ID)
     fun deleteBeer(@PathVariable("beerId") beerId: Int): Mono<ResponseEntity<Unit>> {
-        return beerService.deleteBeerById(beerId).map { ResponseEntity.noContent().build() }
+        return beerService.deleteBeerById(beerId).thenReturn(ResponseEntity.noContent().build())
     }
 
     companion object {
