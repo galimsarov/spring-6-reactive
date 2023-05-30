@@ -64,4 +64,33 @@ class BeerControllerTest {
     fun testDeleteBeer() {
         webTestClient.delete().uri(BeerController.BEER_PATH_ID, 1).exchange().expectStatus().isNoContent
     }
+
+    @Test
+    fun testCreateBeerBadData() {
+        val testBeer = BeerRepositoryTest.getTestBeer().apply { beerName = "" }
+
+        webTestClient.post().uri(BeerController.BEER_PATH)
+            .body(Mono.just(testBeer.toBeerDto()), BeerDTO::class.java)
+            .header("Content-Type", "application/json")
+            .exchange()
+            .expectStatus().isBadRequest
+    }
+
+    @Order(4)
+    @Test
+    fun testUpdateBeerBadRequest() {
+        val testBeer = BeerRepositoryTest.getTestBeer().apply { beerStyle = "" }
+
+        webTestClient.put().uri(BeerController.BEER_PATH_ID, 1)
+            .body(Mono.just(testBeer.toBeerDto()), BeerDTO::class.java)
+            .exchange()
+            .expectStatus().isBadRequest
+    }
+
+    @Test
+    fun testGetByIdNotFound() {
+        webTestClient.get().uri(BeerController.BEER_PATH_ID, 99)
+            .exchange()
+            .expectStatus().isNotFound
+    }
 }
