@@ -76,7 +76,6 @@ class BeerControllerTest {
             .expectStatus().isBadRequest
     }
 
-    @Order(4)
     @Test
     fun testUpdateBeerBadRequest() {
         val testBeer = BeerRepositoryTest.getTestBeer().apply { beerStyle = "" }
@@ -92,5 +91,26 @@ class BeerControllerTest {
         webTestClient.get().uri(BeerController.BEER_PATH_ID, 99)
             .exchange()
             .expectStatus().isNotFound
+    }
+
+    @Test
+    fun testUpdateBeerNotFound() {
+        webTestClient.put().uri(BeerController.BEER_PATH_ID, 999)
+            .body(Mono.just(BeerRepositoryTest.getTestBeer().toBeerDto()), BeerDTO::class.java)
+            .exchange()
+            .expectStatus().isNotFound
+    }
+
+    @Test
+    fun testPatchBeerNotFound() {
+        webTestClient.patch().uri(BeerController.BEER_PATH_ID, 999)
+            .body(Mono.just(BeerRepositoryTest.getTestBeer().toBeerDto()), BeerDTO::class.java)
+            .exchange()
+            .expectStatus().isNotFound
+    }
+
+    @Test
+    fun testDeleteNotFound() {
+        webTestClient.delete().uri(BeerController.BEER_PATH_ID, 999).exchange().expectStatus().isNotFound
     }
 }

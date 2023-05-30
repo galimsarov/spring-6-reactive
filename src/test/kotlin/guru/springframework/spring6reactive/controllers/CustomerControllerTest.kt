@@ -65,4 +65,53 @@ class CustomerControllerTest {
             .expectStatus().isCreated
             .expectHeader().location("http://localhost:8080/api/v2/customer/4")
     }
+
+    @Test
+    fun testCreateCustomerBadData() {
+        val testCustomer = CustomerRepositoryTest.getTestCustomer().apply { customerName = "" }
+
+        webTestClient.post().uri(CustomerController.CUSTOMER_PATH)
+            .body(Mono.just(testCustomer.toCustomerDto()), CustomerDTO::class.java)
+            .header("Content-Type", "application/json")
+            .exchange()
+            .expectStatus().isBadRequest
+    }
+
+    @Test
+    fun testUpdateCustomerBadRequest() {
+        val testCustomer = CustomerRepositoryTest.getTestCustomer().apply { customerName = "" }
+
+        webTestClient.put().uri(CustomerController.CUSTOMER_PATH_ID, 1)
+            .body(Mono.just(testCustomer.toCustomerDto()), CustomerDTO::class.java)
+            .exchange()
+            .expectStatus().isBadRequest
+    }
+
+    @Test
+    fun testGetByIdNotFound() {
+        webTestClient.get().uri(CustomerController.CUSTOMER_PATH_ID, 99)
+            .exchange()
+            .expectStatus().isNotFound
+    }
+
+    @Test
+    fun testUpdateCustomerNotFound() {
+        webTestClient.put().uri(CustomerController.CUSTOMER_PATH_ID, 999)
+            .body(Mono.just(CustomerRepositoryTest.getTestCustomer().toCustomerDto()), CustomerDTO::class.java)
+            .exchange()
+            .expectStatus().isNotFound
+    }
+
+    @Test
+    fun testPatchCustomerNotFound() {
+        webTestClient.patch().uri(CustomerController.CUSTOMER_PATH_ID, 999)
+            .body(Mono.just(CustomerRepositoryTest.getTestCustomer().toCustomerDto()), CustomerDTO::class.java)
+            .exchange()
+            .expectStatus().isNotFound
+    }
+
+    @Test
+    fun testDeleteNotFound() {
+        webTestClient.delete().uri(CustomerController.CUSTOMER_PATH_ID, 999).exchange().expectStatus().isNotFound
+    }
 }

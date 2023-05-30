@@ -38,7 +38,9 @@ class BeerController(private val beerService: BeerService) {
         @PathVariable("beerId") beerId: Int,
         @RequestBody @Validated beerDTO: BeerDTO
     ): Mono<ResponseEntity<Unit>> {
-        return beerService.updateBeer(beerId, beerDTO).map { ResponseEntity.noContent().build() }
+        return beerService.updateBeer(beerId, beerDTO)
+            .switchIfEmpty(Mono.error(ResponseStatusException(HttpStatus.NOT_FOUND)))
+            .map { ResponseEntity.noContent().build() }
     }
 
     @PatchMapping(BEER_PATH_ID)
@@ -46,12 +48,17 @@ class BeerController(private val beerService: BeerService) {
         @PathVariable("beerId") beerId: Int,
         @RequestBody @Validated beerDTO: BeerDTO
     ): Mono<ResponseEntity<Unit>> {
-        return beerService.patchBeer(beerId, beerDTO).map { ResponseEntity.ok().build() }
+        return beerService.patchBeer(beerId, beerDTO)
+            .switchIfEmpty(Mono.error(ResponseStatusException(HttpStatus.NOT_FOUND)))
+            .map { ResponseEntity.ok().build() }
     }
 
     @DeleteMapping(BEER_PATH_ID)
     fun deleteBeer(@PathVariable("beerId") beerId: Int): Mono<ResponseEntity<Unit>> {
-        return beerService.deleteBeerById(beerId).thenReturn(ResponseEntity.noContent().build())
+        return beerService.getBeerById(beerId)
+            .switchIfEmpty(Mono.error(ResponseStatusException(HttpStatus.NOT_FOUND)))
+            .map { beerDto -> beerService.deleteBeerById(beerDto.id) }
+            .thenReturn(ResponseEntity.noContent().build())
     }
 
     companion object {
